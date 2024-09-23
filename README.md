@@ -94,8 +94,8 @@ Dieser bot wurde entwickelt, um die funktionen von flarum bequemer nutzen zu kö
    ```
 3. Offnest `config.py` und gib die verdammten schlüssel ein:
    ```python
-   bot_token = 'penis'  # discord bot token
-   flarum_token = 'pisya'  # flarum_remember token
+   bot_token = ''  # discord bot token
+   flarum_token = ''  # flarum_remember token
    ```
 4. Starten sie es in einer zeile:
    ```bash
