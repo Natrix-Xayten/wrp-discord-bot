@@ -89,7 +89,7 @@ def get_posts(discussion_id):
 
         for v in posts_id:
             post_id = v['id']
-            response_post = requests.get(f'{base_url}api/posts/{post_id}')
+            response_post = requests.get(f'{base_url}api/posts/{post_id}', headers=headers)
             spots = response_post.json()
 
             content = spots['data']['attributes'].get('contentHtml', '')
@@ -97,6 +97,7 @@ def get_posts(discussion_id):
                 continue
 
             soup = BeautifulSoup(content, 'html.parser')
+            
             for mention in soup.find_all('a', class_='PostMention'):
                 username = mention.get_text(strip=True, separator=' ')
                 link = mention['href']
@@ -106,13 +107,20 @@ def get_posts(discussion_id):
                 img.replace_with(f'[Изображение]({img["src"]})')
 
             for blockquote in soup.find_all('blockquote'):
-                blockquote_text = blockquote.get_text(separator='\n', strip=True)
+                blockquote_text = blockquote.get_text(separator=' ', strip=True)
                 blockquote.replace_with(f'> {blockquote_text}')
 
             for ol in soup.find_all('ol'):
                 items = ol.find_all('li')
                 numbered_list = '\n'.join(f'{index + 1}. {item.get_text(strip=True)}' for index, item in enumerate(items))
                 ol.replace_with(numbered_list)
+
+            for a in soup.find_all('a', href=True):
+                url = a['href']
+                link_text = a.get_text(strip=True, separator=' ')
+                formatted_link = f'[{link_text}]({url})'
+                a.replace_with(formatted_link)
+
             author = spots['included'][0]['attributes']['displayName']
             avatar_url = spots['included'][0]['attributes'].get('avatarUrl', None)
             
@@ -120,12 +128,13 @@ def get_posts(discussion_id):
             post_time = datetime.fromisoformat(post_time) + timedelta(hours=3)
             formatted_time = post_time.strftime('%H:%M:%S %d-%m-%Y')
 
-            post_content = soup.get_text(separator='\n', strip=False)
+            post_content = soup.get_text(separator='', strip=False)
             post_end[post_id] = [author, post_content, [img['src'] for img in soup.find_all('img')], avatar_url, formatted_time]
             
         return post_end, discussion_title
     except requests.exceptions.RequestException as e:
         return None, None
+
 
 def split_message(content, max_length=2000):
     if len(content) <= max_length:
