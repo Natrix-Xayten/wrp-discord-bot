@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from utils import like_post, unlike_post, get_posts, send_message, split_message
 from config import bot_token
-from datetime import datetime
 
 intents = discord.Intents.default()
 intents.message_content = True
